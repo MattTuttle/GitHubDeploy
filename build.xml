@@ -1,0 +1,49 @@
+<project name="GitHubDeploy" default="all" basedir=".">
+	<description>Builds the GitHub download deploment</description>
+
+	<property name="app" value="Deploy" />
+	<property name="jar.file" value="${app}.jar" />
+	<property name="build.dir" location="build" />
+	<property name="lib.dir" location="lib" />
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete file="${jar.file}" />
+	</target>
+
+	<target name="-init">
+		<path id="libs.list">
+			<fileset dir="${lib.dir}">
+				<include name="*.jar"/>
+			</fileset>
+		</path>
+	</target>
+
+	<target name="compile" depends="-init">
+		<mkdir dir="${build.dir}"/>
+		<javac srcdir="." destdir="${build.dir}" debug="true" includeantruntime="false">
+			<classpath refid="libs.list"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<manifestclasspath property="libs.list" jarfile="${jar.file}">
+			<classpath refid="libs.list"/>
+		</manifestclasspath>
+		<jar jarfile="${jar.file}">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Main-Class" value="${app}" />
+			</manifest>
+			<fileset dir="${build.dir}" />
+			<zipgroupfileset dir="${lib.dir}" />
+		</jar>
+	</target>
+
+	<target name="run">
+		<java jar="${jar.file}" fork="true"/>
+	</target>
+
+	<target name="all" depends="clean, jar" />
+
+</project>
