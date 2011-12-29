@@ -1,5 +1,5 @@
 import java.io.*;
-
+import java.util.*;
 import org.eclipse.egit.github.core.*;
 import org.eclipse.egit.github.core.service.*;
 
@@ -36,27 +36,25 @@ public class GitHubDeploy
 	{
 		for (int i = 0; i < args.length; i++)
 		{
-			if (args[i].compareTo("-f") == 0)
+			String[] commands = args[i].split("=");
+			if (commands[0].compareTo("-f") == 0)
 			{
-				i += 1;
-				filename = args[i];
+				filename = commands[1];
 			}
-			else if (args[i].compareTo("-d") == 0)
+			else if (commands[0].compareTo("-d") == 0)
 			{
-				description = args[i];
+				description = commands[1];
 			}
-			else if (args[i].compareTo("-l") == 0)
+			else if (commands[0].compareTo("-l") == 0)
 			{
-				i += 1;
-				String[] login = args[i].split(":");
+				String[] login = commands[1].split(":");
 
 				service = new DownloadService();
 				service.getClient().setCredentials(login[0], login[1]);
 			}
-			else if (args[i].compareTo("-r") == 0)
+			else if (commands[0].compareTo("-r") == 0)
 			{
-				i += 1;
-				String[] repo = args[i].split(":");
+				String[] repo = commands[1].split(":");
 				repository = new RepositoryId(repo[0], repo[1]);
 			}
 		}
@@ -64,12 +62,24 @@ public class GitHubDeploy
 
 	public void usage()
 	{
-		System.out.println("deploy -l user:pass -r id:repo -f filename.txt [-d Description]");
+		System.out.println("deploy -l=user:pass -r=id:repo -f=filename.txt [-d=Description]");
 	}
 
 	public void deploy() throws IOException
 	{
 		File file = new File(filename);
+
+		List<Download> downloads = service.getDownloads(repository);
+		Iterator<Download> it = downloads.iterator();
+		while (it.hasNext())
+		{
+			Download download = it.next();
+			if (download.getName().compareTo(filename) == 0)
+			{
+				service.deleteDownload(repository, download.getId());
+				break;
+			}
+		}
 
 		Download download = new Download();
 		download.setSize(file.length());
