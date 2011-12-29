@@ -36,25 +36,28 @@ public class GitHubDeploy
 	{
 		for (int i = 0; i < args.length; i++)
 		{
-			String[] commands = args[i].split("=");
-			if (commands[0].compareTo("-f") == 0)
+			if (args[i].compareTo("-f") == 0)
 			{
-				filename = commands[1];
+				i += 1;
+				filename = args[i];
 			}
-			else if (commands[0].compareTo("-d") == 0)
+			else if (args[i].compareTo("-d") == 0)
 			{
-				description = commands[1];
+				i += 1;
+				description = args[i];
 			}
-			else if (commands[0].compareTo("-l") == 0)
+			else if (args[i].compareTo("-l") == 0)
 			{
-				String[] login = commands[1].split(":");
+				i += 1;
+				String[] login = args[i].split(":");
 
 				service = new DownloadService();
 				service.getClient().setCredentials(login[0], login[1]);
 			}
-			else if (commands[0].compareTo("-r") == 0)
+			else if (args[i].compareTo("-r") == 0)
 			{
-				String[] repo = commands[1].split(":");
+				i += 1;
+				String[] repo = args[i].split(":");
 				repository = new RepositoryId(repo[0], repo[1]);
 			}
 		}
@@ -62,7 +65,7 @@ public class GitHubDeploy
 
 	public void usage()
 	{
-		System.out.println("deploy -l=user:pass -r=id:repo -f=filename.txt [-d=Description]");
+		System.out.println("deploy -l user:pass -r id:repo -f filename.txt [-d Description]");
 	}
 
 	public void deploy() throws IOException
